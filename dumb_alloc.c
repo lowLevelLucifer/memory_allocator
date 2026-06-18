@@ -23,7 +23,7 @@ void *my_malloc(size_t size){
 	block_meta *current = head; 
 	while(current){
 		if(current->free && current->size >= size){
-			if(current->size >= size + sizeof(block_meta)){
+			if(current->size >= sizeof(block_meta) && current->size - sizeof(block_meta) >= size){
 				split_block(current , size);
 			}
 			current->free = 0; 
@@ -54,31 +54,22 @@ void my_free(void *ptr){
 	block->free = 1;
 }
 int main(){
-	char *a = my_malloc(8); 
-       	a[0] = 'A'; 
-	a[1] = '\0'; 
-	printf("a = %p, content =%s\n", a,a); 
+	char *x = my_malloc(100);
+	my_free(x); 
 
-	char *b = my_malloc(16); 
-	b[0] = 'B'; 
-	b[1] = '\0'; 
-	printf("b = %p, content =%s\n",b,b); 
-	
-	char *c = my_malloc(32); 
-	c[0] = 'C'; 
-	c[1] = '\0';
-	printf("c = %p, content =%s\n",c,c); 
+	block_meta *block = (block_meta *)x -1;
 
-	my_free(c); 
-	char *e = my_malloc(4);
-	printf("e = %p\n",e);
+	block->size = (size_t)-1; 
+	block->free = 1;
 
-	block_meta *current = head; 
-	int i =0; 
-	while(current){
-		printf("Block %d: addr=%p size=%zu free=%d\n", i,current,current->size, current->free); 
-		current = current->next;
-		i++;
-	}
+	printf("Block size set to: %zu\n", block->size);
+
+	size_t request = (size_t)-1 - 10; 
+
+	printf("Requesting size: %zu\n", request);
+	void  *result = my_malloc(request); 
+	printf("Result pointer: %p\n", result); 
+	printf("Block size after: %zu , free= %d\n", block->size, block->free);
+
 	return 0;
 }
