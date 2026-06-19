@@ -2,6 +2,7 @@
 
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 typedef struct block_meta{
 	size_t size; 
@@ -48,6 +49,38 @@ void *malloc(size_t size){
 	}
 	return (void*)(block+1);
 }
+
+void *calloc(size_t nmemb, size_t size){
+	void *ptr = malloc(nmemb * size);
+	if(ptr){
+		char *p =ptr;
+		size_t total =nmemb * size;
+		while(total--) *p++ =0;
+	}
+	return ptr;
+}
+
+void *realloc(void *ptr, size_t size){
+	if(!ptr) return malloc(size);
+	if(size == 0){
+		free(ptr);
+		return NULL;
+	}
+	block_meta *block = (block_meta *)ptr - 1;
+	if(block->size >= size) return ptr;
+
+	void *new_ptr = malloc(size);
+	if(!new_ptr) return NULL;
+
+	char *src = ptr;
+	char *dst = new_ptr;
+	size_t copy_size = block->size;
+	while(copy_size--) *dst++ = *src++;
+
+	free(ptr);
+	return new_ptr;
+}
+
 void free(void *ptr){
 	if(!ptr) return; 
 	block_meta *block = (block_meta *)ptr -1;
