@@ -98,7 +98,7 @@ void *realloc(void *ptr, size_t size){
 
 void free(void *ptr){
 	if(!ptr) return; 
-	pthread_lock_mutex(&alloc_lock);
+	pthread_mutex_lock(&alloc_lock);
 	block_meta *block = (block_meta *)ptr -1;
 	block->free = 1;
 	if(block->next && block->next->free){
