@@ -1,0 +1,5 @@
+*.so
+test
+stress_test
+dumb_alloc
+*.o
